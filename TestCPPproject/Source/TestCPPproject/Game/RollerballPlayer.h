@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "RollerballPlayer.generated.h"
 
+
+
 class USpringArmComponent;
 class UCameraComponent;
 
@@ -34,12 +36,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float JumpImpulse = 500.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 MaxJumpCount {1};
+	int32 MaxJumpCount {2};
 
 	//FUNCTIONS
-	void MoveRight(float value);
-	void MoveForward(float value);
-	void Jump();
+
 public:	
 	// Called every frame
 	//virtual void Tick(float DeltaTime) override;
@@ -47,6 +47,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 private:
+
+	void MoveRight(float value);
+	void MoveForward(float value);
+	void Jump();
+	
 	int32 jumpCount = 0;
+	UFUNCTION()
+	void CustomOnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit );
 	
 };

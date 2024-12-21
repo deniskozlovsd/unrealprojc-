@@ -19,12 +19,22 @@ ARollerballPlayer::ARollerballPlayer()
 	SpringArm->SetupAttachment(Mesh);
 	Camera->SetupAttachment(SpringArm);
 
+	//sets physics to true
+	Mesh->SetSimulatePhysics(true);
+
+	//DDB - dynamic delicate binding
+	Mesh->OnComponentHit.AddDynamic(this, &ARollerballPlayer::CustomOnHit);
+
 }
 
 // Called when the game starts or when spawned
 void ARollerballPlayer::BeginPlay()
 {
+	
 	Super::BeginPlay();
+	//account for mass in MoveForce
+	MoveForce *= Mesh->GetMass();
+	JumpImpulse *= Mesh->GetMass();  
 	
 }
 
@@ -47,22 +57,35 @@ void ARollerballPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	
 }
 
+// Called to bind functionality to input
+
 void ARollerballPlayer::MoveRight(float value)
 {
+	const FVector Right = Camera->GetRightVector() * MoveForce * value;
+	Mesh->AddForce(Right);
 }
 
 void ARollerballPlayer::MoveForward(float value)
 {
+	const FVector Forward = Camera->GetForwardVector() * MoveForce * value;
+	Mesh->AddForce(Forward);
 }
 
 void ARollerballPlayer::Jump()
 {
+	if (jumpCount >= MaxJumpCount) {return;} //capping the jumps
+	Mesh->AddImpulse(FVector(0,0,JumpImpulse));
+	jumpCount++;
 }
 
-// Called to bind functionality to input
-void ARollerballPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ARollerballPlayer::CustomOnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit )
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	const float HitDirection = Hit.Normal.Z;
+	if (HitDirection > 0)
+	{
+		jumpCount = 0;
+	}
 }
+
+
 
